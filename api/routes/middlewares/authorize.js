@@ -1,42 +1,36 @@
-const jwt = require("jsonwebtoken");
-const userModel = require("../../models/userModel");
+const jwt = require('jsonwebtoken');
+const userModel = require('../../models/userModel');
+const UnauthorizedError = require('../../errors/UnauthorizedError');
 
-const UnauthorizedError = require("../../errors/UnauthorizedError");
-
-const authorize = async (req, res, next) => {
+module.exports.authorize = async (req, res, next) => {
   try {
-    const authorizationHeader = req.get("Authorization");
+    const authorizationHeader = req.get('Authorization' || '');
 
     if (!authorizationHeader) {
-      return new UnauthorizedError("No authorization header found");
+      throw new UnauthorizedError('No authorization header found');
     }
 
-    const token = authorizationHeader.replace("Bearer ", "");
-
-    if (!token) {
-      return new UnauthorizedError("No JWT token found in header");
-    }
+    const token = authorizationHeader.replace('Bearer ', '');
 
     let userId;
 
     try {
       userId = await jwt.verify(token, process.env.JWT_SECRET).id;
     } catch (err) {
-      next(new UnauthorizedError("User not authorized"));
+      next(new UnauthorizedError('User not authorized'));
     }
 
     const user = await userModel.findById(userId);
+
     if (!user || user.token !== token) {
-      return new UnauthorizedError("User not authorized");
+      return new UnauthorizedError('User not authorized');
     }
 
     req.user = user;
     req.token = token;
-
+    
     next();
   } catch (err) {
     next(err);
   }
 };
-
-module.exports = authorize;

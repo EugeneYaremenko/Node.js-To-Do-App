@@ -1,15 +1,12 @@
-const bcryptjs = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const bcryptjs = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const userModel = require("../models/userModel");
+const userModel = require('../models/userModel');
 
-const sendVerificationEmail = require("../helpers/sendVerificationEmail");
-const AuthenticationError = require("../errors/AuthenticationError");
+const sendVerificationEmail = require('../helpers/sendVerificationEmail');
+const AuthenticationError = require('../errors/AuthenticationError');
 
-const path = require("path");
-require("dotenv").config({ path: path.join(__dirname, ".env") });
-
-class authController {
+class AuthController {
   async createUser(req, res, next) {
     try {
       const { username, password, email } = req.body;
@@ -19,7 +16,7 @@ class authController {
       if (existingUser) {
         return res
           .status(400)
-          .send({ message: "User with such email alredy exists" });
+          .send({ message: 'User with such email alredy exists' });
       }
 
       const passwordHash = await bcryptjs.hash(password, 4);
@@ -48,7 +45,7 @@ class authController {
 
       const user = await userModel.findUserByEmail(email);
 
-      if (!user || user.status !== "Verified") {
+      if (!user || user.status !== 'Verified') {
         next(new AuthenticationError());
       }
 
@@ -59,7 +56,7 @@ class authController {
       }
 
       const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "2d", //two days
+        expiresIn: '2d', //two days
       });
 
       await userModel.updateToken(user._id, token);
@@ -80,6 +77,8 @@ class authController {
       const user = req.user;
 
       await userModel.updateToken(user._id, null);
+
+      return res.status(204).send();
     } catch (err) {
       next(err);
     }
@@ -101,4 +100,4 @@ class authController {
   }
 }
 
-module.exports = new authController();
+module.exports = new AuthController();

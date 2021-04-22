@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const NotesController = require('../controllers/notesController');
+const { authorize } = require('../routes/middlewares/authorize');
 
-const notesController = require("../controllers/notesController");
-
-router.get("/", notesController.getNotes);
-router.get("/:id", notesController.getById);
-router.post("/create", notesController.createNotes);
-router.delete("/delete", notesController.deleteNotes);
-router.putch("/update", notesController.updateNotes);
+router.get('/', authorize, NotesController.getNotes);
+router.get('/:id', authorize, NotesController.getNoteById);
+router.post('/', authorize, NotesController.createNote);
+router.put('/:id', authorize, NotesController.updateNote);
+router.delete('/:id', authorize, NotesController.deleteNote);
 
 module.exports = router;
