@@ -1,48 +1,52 @@
 const Joi = require('joi');
-const { Types: { ObjectId }} = require('mongoose');
+const {
+  Types: { ObjectId },
+} = require('mongoose');
 
-const NotFoundError = require("../../errors/NotFoundError");
+const NotFoundError = require('../../errors/NotFoundError');
 
-class notesValidation {
-  async validateNoteId(req, res, next) {
-    const { id } = req.params;
+const validateNoteId = async (req, res, next) => {
+  const { id } = req.params;
 
-    if (!ObjectId.isValid(id)) {
-      throw new NotFoundError();
-    }
-
-    next();
+  if (!ObjectId.isValid(id)) {
+    throw new NotFoundError();
   }
 
-  async validateCreateNote(req, res, next) {
-    const validationRules = Joi.object({
-      text: Joi.string().min(3).max(300).required(),
-    });
+  next();
+};
 
-    const validationResult = await validationRules.validate(req.body);
+const validateCreateNote = async (req, res, next) => {
+  const validationRules = Joi.object({
+    text: Joi.string().min(3).max(300).required(),
+  });
 
-    if (validationResult.error) {
-      return res.status(400).send(validationResult.error);
-    }
+  const validationResult = await validationRules.validate(req.body);
 
-    next();
+  if (validationResult.error) {
+    return res.status(400).send(validationResult.error);
   }
 
-  async validateUpdateNote(req, res, next) {
-    const validationRules = Joi.object({
-      text: Joi.string().alphanum().min(3).max(300),
-      createdTime: Joi.date(),
-      completed: Joi.boolean(),
-    });
+  next();
+};
 
-    const validationResult = validationRules.validate(req.body);
+const validateUpdateNote = async (req, res, next) => {
+  const validationRules = Joi.object({
+    text: Joi.string().alphanum().min(3).max(300),
+    createdTime: Joi.date(),
+    completed: Joi.boolean(),
+  });
 
-    if (validationResult.error) {
-      return res.status(400).send(validationResult.error);
-    }
+  const validationResult = validationRules.validate(req.body);
 
-    next();
+  if (validationResult.error) {
+    return res.status(400).send(validationResult.error);
   }
-}
 
-module.exports = new notesValidation();
+  next();
+};
+
+module.exports = {
+  validateNoteId,
+  validateCreateNote,
+  validateUpdateNote,
+};

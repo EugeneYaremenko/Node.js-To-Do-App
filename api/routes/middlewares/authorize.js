@@ -15,20 +15,32 @@ module.exports.authorize = async (req, res, next) => {
     let userId;
 
     try {
-      userId = await jwt.verify(token, process.env.JWT_SECRET).id;
+      const payload = await jwt.verify(token, process.env.JWT_SECRET);
+
+      if (payload.type !== 'access') {
+        res.status(401).json({ message: 'Invalid token' });
+
+        return;
+      }
+
+      userId = payload.userId;
     } catch (err) {
+      if (err instanceof jwt.TokenExpiredError) {
+        next(res.status(401).json({ message: 'Token expired' }));
+      }
+
+      if (err instanceof jwt.JsonWebTokenError) {
+        next(res.status(401).json({ message: 'Invalid token' }));
+      }
+
       next(new UnauthorizedError('User not authorized'));
     }
 
     const user = await userModel.findById(userId);
 
-    if (!user || user.token !== token) {
-      return new UnauthorizedError('User not authorized');
-    }
-
     req.user = user;
     req.token = token;
-    
+
     next();
   } catch (err) {
     next(err);

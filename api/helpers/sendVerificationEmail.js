@@ -1,13 +1,13 @@
 const sgMail = require('@sendgrid/mail');
 const uuid = require('uuid');
-const userModel = require('../models/userModel');
+const authHelper = require('../helpers/authHelper');
 const emailMessageTemplate = require('../helpers/templates/emailMessageTemplate');
 
 const sendVerificationEmail = async user => {
   try {
     const verificationToken = uuid.v4();
 
-    await userModel.createVerificationToken(user._id, verificationToken);
+    await authHelper.createVerificationToken(user._id, verificationToken);
 
     await sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 

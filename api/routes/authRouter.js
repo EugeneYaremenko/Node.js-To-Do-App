@@ -8,6 +8,7 @@ const verifiEmail = require('../routes/middlewares/verifiEmail');
 const { authorize } = require('../routes/middlewares/authorize');
 
 router.post('/signup', AuthValidation.validateCreateUser, AuthController.createUser);
+router.post('/refresh-tokens', AuthController.refreshTokens);
 router.get('/verify/:verificationToken', verifiEmail);
 router.put('/login', AuthValidation.validateSingIn, AuthController.signIn);
 router.patch('/logout', authorize, AuthController.logout);

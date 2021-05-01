@@ -1,39 +1,40 @@
 const Joi = require('joi');
 
-class AuthValidation {
-  async validateCreateUser(req, res, next) {
-    const validationRules = Joi.object({
-      username: Joi.string().alphanum().min(3).max(30).required(),
-      email: Joi.string().email({
-        minDomainSegments: 2,
-        tlds: { allow: ['com', 'net', 'ru'] },
-      }),
-      password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
-    });
+const validateCreateUser = async (req, res, next) => {
+  const validationRules = Joi.object({
+    username: Joi.string().alphanum().min(3).max(30).required(),
+    email: Joi.string().email({
+      minDomainSegments: 2,
+      tlds: { allow: ['com', 'net', 'ru'] },
+    }),
+    password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+  });
 
-    const validationResult = await validationRules.validate(req.body);
+  const validationResult = await validationRules.validate(req.body);
 
-    if (validationResult.error) {
-      return res.status(400).send(validationResult.error);
-    }
-
-    next();
+  if (validationResult.error) {
+    return res.status(400).send(validationResult.error);
   }
 
-  async validateSingIn(req, res, next) {
-    const signInRules = Joi.object({
-      email: Joi.string().required(),
-      password: Joi.string().required(),
-    });
+  next();
+};
 
-    const validationResult = await signInRules.validate(req.body);
+const validateSingIn = async (req, res, next) => {
+  const signInRules = Joi.object({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  });
 
-    if (validationResult.error) {
-      return res.status(400).send(validationResult.error);
-    }
+  const validationResult = await signInRules.validate(req.body);
 
-    next();
+  if (validationResult.error) {
+    return res.status(400).send(validationResult.error);
   }
-}
 
-module.exports = new AuthValidation();
+  next();
+};
+
+module.exports = {
+  validateCreateUser,
+  validateSingIn,
+};
