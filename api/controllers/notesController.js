@@ -1,11 +1,11 @@
-const noteModel = require('../models/noteModel');
-const NotFoundError = require('../errors/NotFoundError');
+const noteModel = require("../models/noteModel");
+const NotFoundError = require("../errors/NotFoundError");
 
 const getNotes = async (req, res, next) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit) : 5;
     const skip = req.query.skip ? parseInt(req.query.skip) : 0;
-    const sortOrder = req.query.sort == 'ASC' ? 1 : -1; //ASC || DESC
+    const sortOrder = req.query.sort == "ASC" ? 1 : -1; //ASC || DESC
 
     const notes = await noteModel.find(
       { userId: req.user._id },
@@ -14,7 +14,7 @@ const getNotes = async (req, res, next) => {
     );
 
     if (!notes || !notes.length) {
-      res.json({ message: 'Notes not found' });
+      res.json({ message: "Notes not found" });
     }
 
     res.json({ notes });
@@ -29,6 +29,10 @@ const getNoteById = async (req, res, next) => {
 
     const note = await noteModel.findById(noteId, { __v: 0 });
 
+    if (!note) {
+      throw new NotFoundError();
+    }
+
     return res.status(200).json(note);
   } catch (err) {
     next(err);
@@ -40,7 +44,7 @@ const createNote = async (req, res, next) => {
 
   await note.save();
 
-  return res.json({ message: 'Note created' });
+  return res.json({ message: "Note created" });
 };
 
 const updateNote = async (req, res, next) => {
@@ -61,7 +65,7 @@ const updateNote = async (req, res, next) => {
       throw new NotFoundError();
     }
 
-    return res.status(200).send({ message: 'Note updated' });
+    return res.status(200).send({ message: "Note updated" });
   } catch (err) {
     next(err);
   }
@@ -77,7 +81,7 @@ const deleteNote = async (req, res, next) => {
       throw new NotFoundError();
     }
 
-    return res.status(200).send({ message: 'Note deleted' });
+    return res.status(200).send({ message: "Note deleted" });
   } catch (err) {
     next(err);
   }

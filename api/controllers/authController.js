@@ -1,11 +1,11 @@
-const bcryptjs = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcryptjs = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-const userModel = require('../models/userModel');
+const userModel = require("../models/userModel");
 
-const authHelper = require('../helpers/authHelper');
-const sendVerificationEmail = require('../helpers/sendVerificationEmail');
-const AuthenticationError = require('../errors/AuthenticationError');
+const authHelper = require("../helpers/authHelper");
+const sendVerificationEmail = require("../helpers/sendVerificationEmail");
+const AuthenticationError = require("../errors/AuthenticationError");
 
 const createUser = async (req, res, next) => {
   try {
@@ -16,7 +16,7 @@ const createUser = async (req, res, next) => {
     if (existingUser) {
       return res
         .status(400)
-        .send({ message: 'User with such email alredy exists' });
+        .send({ message: "User with such email alredy exists" });
     }
 
     const passwordHash = await bcryptjs.hash(password, 4);
@@ -39,7 +39,7 @@ const createUser = async (req, res, next) => {
   }
 };
 
-const updateTokens = async userId => {
+const updateTokens = async (userId) => {
   const accessToken = await authHelper.generateAccessToken(userId);
   const refreshToken = await authHelper.generateRefreshToken();
 
@@ -59,20 +59,20 @@ const refreshTokens = async (req, res) => {
   try {
     payload = jwt.verify(refreshToken, secret);
 
-    if (payload.type !== 'refresh') {
-      res.status(400).json({ message: 'Invalid token' });
+    if (payload.type !== "refresh") {
+      res.status(400).json({ message: "Invalid token" });
 
       return;
     }
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
-      res.status(400).json({ message: 'Token expired' });
+      res.status(400).json({ message: "Token expired" });
 
       return;
     }
 
     if (err instanceof jwt.JsonWebTokenError) {
-      res.status(400).json({ message: 'Invalid token' });
+      res.status(400).json({ message: "Invalid token" });
 
       return;
     }
@@ -81,7 +81,7 @@ const refreshTokens = async (req, res) => {
   const token = await userModel.findOne({ refreshTokenId: payload.id }).exec();
 
   if (token === null) {
-    throw new Error('Invalid token');
+    throw new Error("Invalid token");
   }
 
   const tokens = await updateTokens(token._id);
@@ -99,7 +99,7 @@ const signIn = async (req, res, next) => {
 
     const user = await authHelper.findUserByEmail(email);
 
-    if (!user || user.status !== 'Verified') {
+    if (!user || user.status !== "Verified") {
       next(new AuthenticationError());
     }
 
@@ -121,11 +121,7 @@ const logout = async (req, res, next) => {
   try {
     const user = req.user;
 
-    await userModel.updateToken(user._id, null);
-
-    return userModel.findByIdAndUpdate(user._id, {
-      token: newToken,
-    });
+    await authHelper.replaceDbRefreshTokenId(null, user._id);
 
     return res.status(204).send();
   } catch (err) {

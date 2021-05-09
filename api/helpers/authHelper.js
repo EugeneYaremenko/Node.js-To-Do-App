@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
 
 const verifyUser = async userId => {
-  return userModel.findByIdAndUpdate(
+  return await userModel.findByIdAndUpdate(
     userId,
     {
       status: 'Verified',
@@ -15,11 +15,11 @@ const verifyUser = async userId => {
 };
 
 const findUserByEmail = async email => {
-  return userModel.findOne({ email });
+  return await userModel.findOne({ email });
 };
 
 const createVerificationToken = async (userId, verificationToken) => {
-  return userModel.findByIdAndUpdate(
+  return await userModel.findByIdAndUpdate(
     userId,
     {
       verificationToken,
@@ -31,13 +31,13 @@ const createVerificationToken = async (userId, verificationToken) => {
 };
 
 const findByVerificationToken = async verificationToken => {
-  return userModel.findOne({
+  return await userModel.findOne({
     verificationToken,
   });
 };
 
 const deleteVerificationTokenField = async delId => {
-  return userModel.findByIdAndUpdate(
+  return await userModel.findByIdAndUpdate(
     delId,
     { $unset: { verificationToken: 'null' } },
     {

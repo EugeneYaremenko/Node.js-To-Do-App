@@ -1,15 +1,15 @@
-const Joi = require('joi');
+const Joi = require("joi");
 const {
   Types: { ObjectId },
-} = require('mongoose');
+} = require("mongoose");
 
-const NotFoundError = require('../../errors/NotFoundError');
+const NotFoundError = require("../../errors/NotFoundError");
 
 const validateNoteId = async (req, res, next) => {
   const { id } = req.params;
 
   if (!ObjectId.isValid(id)) {
-    throw new NotFoundError();
+    next(new NotFoundError("Note is not found"));
   }
 
   next();
@@ -36,7 +36,7 @@ const validateUpdateNote = async (req, res, next) => {
     completed: Joi.boolean(),
   });
 
-  const validationResult = validationRules.validate(req.body);
+  const validationResult = await validationRules.validate(req.body);
 
   if (validationResult.error) {
     return res.status(400).send(validationResult.error);
