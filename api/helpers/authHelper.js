@@ -52,7 +52,7 @@ const generateAccessToken = async userId => {
     type: 'access',
   };
 
-  const options = { expiresIn: '20m' };
+  const options = { expiresIn: '5m' };
   const secret = process.env.JWT_SECRET;
 
   const accessToken = await jwt.sign(payload, secret, options);
@@ -68,7 +68,7 @@ const generateRefreshToken = async () => {
 
   const secret = process.env.JWT_SECRET;
 
-  const options = { expiresIn: '1d' };
+  const options = { expiresIn: '10m' };
 
   const refreshToken = {
     id: payload.id,
